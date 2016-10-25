@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<script src="Javascript//Chart.js"> </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<head>
+    <script>
+        $( document ).ready(function() {
+        });
+    </script>
+    <style>
+        body{
+            background-color: black;
+            overflow: hidden;
+            font-family: "Lato", sans-serif;
+        }
+        .chart{
+            position: absolute; 
+            left: 250px;
+            width: calc(100% - 250px);
+            height: calc(100% - 20px);
+        }
+        canvas{
+            height: 100% !important;
+        }
+        .sidenav {
+            height: calc(100%);
+            width: 250px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            overflow-y: auto;
+            transition: 0.5s;
+        }
+        .sidenav a:hover, .offcanvas a:focus{
+            color: #f1f1f1;
+        }
+        .sidenav a {
+            padding: 8px 8px 8px 32px;
+            text-decoration: none;
+            font-size: 25px;
+            color: #818181;
+            display: block;
+            transition: 0.3s
+        }
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            background: rgba(125,125,125,0.2); 
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+        }
+        ::-webkit-scrollbar-thumb:window-inactive {
+            background: rgba(0,0,0,0.2); 
+        }
+       </style>
+</head>
+<body>
+<div id="sidenav" class="sidenav">
+    </br></br>
+    <a>GOOG</a>
+    <a>AAPL</a>
+    <a>MCRSFT</a>
+    <a>GOOG</a>
+    <a>AAPL</a>
+    <a>MCRSFT</a>
+    <a>GOOG</a>
+    <a>AAPL</a>
+    <a>MCRSFT</a>
+    <a>GOOG</a>
+    <a>AAPL</a>
+    <a>MCRSFT</a>
+    <a>GOOG</a>
+    <a>AAPL</a>
+    <a>MCRSFT</a>
+</div>
+<div id="chart" class ="chart">
+</div>
+<!--
+<script> 
+    var ctx = document.getElementById("chart");
+    var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+        datasets: [{
+            label: '# of Votes',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+    });
+</script>
+
+    -->
+</body>
+<script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      $(window).resize(function () {
+          drawChart();
+      });
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Sales', 'Expenses'],
+          ['2013',  1000,      400],
+          ['2014',  1170,      460],
+          ['2015',  660,       1120],
+          ['2016',  1030,      540]
+        ]);
+
+        var options = {
+            title: 'Company Performance',
+            backgroundColor: 'black',
+            hAxis: {title: 'Year',  titleTextStyle: {color: '#333'}},
+            vAxis: { minValue: 0 },
+            chartArea: { width: "90%", height: "90%" },
+            legend: { position: "none" }
+        };
+
+        var chart = new google.visualization.AreaChart(document.getElementById('chart'));
+        chart.draw(data, options);
+      }
+</script>
+
+</html>
+

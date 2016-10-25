@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<style>
+    div.ui-widget-content
+    {
+        background-color: #313131;
+        border-color: black;
+        color: white;
+        font-size: 125%;
+        position: relative;
+        align-content: center;
+    }
+    div.title { 
+        background-color: #2A2A2A;
+        color: white;
+        font-size: 100%;
+        position: relative;
+        text-align: center;
+        line-height: 35px;
+        vertical-align: middle;
+        height: 35px;
+    }
+    div.donation { 
+        position: absolute; 
+        left: 40%;
+        color: white;
+        width: 300px;
+        height: 100px;
+        text-align: center;
+        line-height: 100px;
+        vertical-align: middle;
+        background-color: #252526;
+        border: 2px solid white;
+    }
+    div.indicatorLight  {padding: 5px; border-radius:50%;width:22px;height:22px;border:2px solid #3d3d3d;box-shadow: 0px 0px 15px red;margin-top:5px;float:left;background-color:red;margin-right:10px;}
+	div.indicatorLightOn {background-color:green ;box-shadow: 0px 0px 15px green;border-color:#FDF1DF;}
+	.draggable { width: 250px; height: 250px; float: left; font-size: .9em; position: relative;}
+
+</style>
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+
+  <link rel="stylesheet" href="C:\Users\Garrett Tongue\Desktop\Web Development\jquery-ui-1.11.4.custom\jquery-ui-1.11.4.custom\jquery-ui.css">
+  <script src="jquery-3.0.0.min.js"></script>
+  <script src="C:\Users\Garrett Tongue\Desktop\Web Development\jquery-ui-1.11.4.custom\jquery-ui-1.11.4.custom\jquery-ui.min.js"></script>
+  <script src="C:\Users\Garrett Tongue\Desktop\Web Development\canvasjs-1.8.1/canvasjs.min.js"></script>
+
+
+
+
+   <script>
+  $(function() {
+   // $( "#draggable" ).draggable({grid: [200, 200]});
+    $( ".draggable" ).draggable(/*{ snap: ".ui-widget-content"}*/ function(){
+        $(this).css('z-index', 2);
+        $(this).siblings('div').css('z-index', 1);
+    });
+    $( ".draggable" ).resizable();
+    //$(".indicatorLight").draggable();
+    $(".draggable").click(function(e){
+        $(".donation").fadeIn('slow', fadeOut());
+
+    });
+   // $( ".draggable" ).fadeOut(500);
+    //$( "#draggableTwo" ).draggable({ snap: ".ui-widget-content"});
+  });
+    function fadeOut(){
+        setTimeout("fadeOutReal()", 2000);
+    }
+    function fadeOutReal(){
+        $( ".donation" ).fadeOut('slow');
+    }
+    window.onload = function () {
+        $(".donation").hide();
+        var chart = new CanvasJS.Chart("chart",
+        {
+            title:{
+            },
+            backgroundColor: "#333333",
+            data: [
+            {
+                type: "bar",
+                dataPoints: [
+                { x: 10, y: 90, label:"Apple" },
+                { x: 20, y: 70, label:"Mango" },
+                { x: 30, y: 50, label:"Orange" },
+                { x: 40, y: 60, label:"Banana" },
+                { x: 50, y: 20, label:"Pineapple" },
+                { x: 60, y: 30, label:"Pears" },
+                { x: 70, y: 35, label:"Grapes" },
+                { x: 80, y: 40, label:"Lychee" },
+                { x: 90, y: 30, label:"Jackfruit" }
+                ]
+            }
+            ]
+        });
+
+        chart.render();
+        }
+  </script>
+  </head>
+<body style="background-color: #1E1E1E;">
+<br style="clear:both">
+<div id="draggable" class="draggable ui-widget-content" style="width: 1280px;">
+    <div class = "title">
+        Status
+    </div>
+    <div id = "chart" style="height:85%; margin-top:10px;">
+
+    </div>
+</div>
+<div id="draggableTwo" class="draggable ui-widget-content">
+    <div class = "title">
+        More Info
+    </div>
+</div>
+<div id="draggable" class="draggable ui-widget-content">
+    <div class = "title">
+        Status
+    </div>
+    <div id = "chart" style="height:85%; margin-top:10px;">
+
+    </div>
+</div>
+<div id="draggableTwo" class="draggable ui-widget-content">
+    <div class = "title">
+        More Info
+    </div>
+</div>
+<div id = "donation" class = "donation">
+    THIS IS A DONATION: $1,000,000,000
+</div>
+<div class = "draggable ui-widget-content" style = "width: 200px; height: 50px;" >
+Hatchery
+<div id = "" class = "indicatorLightOn indicatorLight" > 
+</div>
+Online
+</div>
+</body>
+</html>
