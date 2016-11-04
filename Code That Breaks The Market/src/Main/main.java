@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 import StockData.DataAnalysis;
+import StockData.ETFPair;
 import StockData.HistoricalData;
 import StockData.Price;
 import StockData.YahooCSV.CSV;
@@ -17,6 +18,22 @@ public class main {
 		//ArrayList<Price> prices = CSV.ParseCSV("");
 		//System.out.println(prices);
 		//getData();
+		String[] ETFS = {"SPY","GDX","EEM","XLF","USO","VXX","UVXY","NUGT","EWJ","XIV","IWM","UWTI","QQQ","EWZ","FXI","GDXJ","EFA","JNUG","XOP","XLU","XLE","VWO",
+				"DGAZ","XLP","HYG","JNK","DUST","XLI","GLD","SLV","SDS","XLV","UCO","XLK","TVIX","IYR","TLT","RSX","TZA","AMLP","EWT","VEA","IEMG","UNG","SQQQ",
+				"XBI","IAU","SPXU","LQD","KRE","SVXY","XLY","OIH","JDST","DWTI","SPXS","XLB","VNQ","XME","DXJ","EZU","EWW","USMV","DBEF","BKLN","XRT","ERX","TNA","LABD","EWU","VGK",
+				"IVV","EPI","EWG","KBE","PFF","VIXY","DIA","LABU","OIL","UGAZ","FAS","SPLV","SSO","EWH","AGG","SMH","SH","IWD","UPRO","QID","EWY","ITB","INDA","XHB","ERY"};
+		HashMap<String, ArrayList<ETFPair>> map = new HashMap<String, ArrayList<ETFPair>>();
+		for(String etf : ETFS){
+			System.out.println(etf);
+			String test = CSV.FetchCSVData("http://etfdailynews.com/etf/" + etf + "/");
+			CSV.parseETF(etf, map, test);
+		}
+		CSV.buildETFData(map);
+		System.out.println(map);
+		//System.out.println(test);
+
+	}
+	public static void loadDataToHash(){
 		String data = CSV.ReadFile("data.csv");
 	//	System.out.println(data);
 		HashMap<String, String> stocks = CSV.LoadCSVToHashmap(data);

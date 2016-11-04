@@ -1,0 +1,6 @@
+package StockData;
+
+public class ETFPair {
+	public String ETFname; 
+	public double percent;
+}
