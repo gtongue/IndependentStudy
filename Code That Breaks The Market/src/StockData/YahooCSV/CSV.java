@@ -25,10 +25,29 @@ public class CSV {
 
 	}
 
-	public static void parseETF(String ETFName, HashMap<String, ArrayList<ETFPair>> map, String rawHTML) {
+	public static void parseETF(String ETFName, HashMap<String, ArrayList<ETFPair>> map, HashMap<String, Double> etfs, String rawHTML) {
 		int temp = 0;
 		String SYM = "";
 		double percent = 0;
+		String find = "Assets Under Management (AUM)";
+		temp = rawHTML.indexOf(find) + find.length();
+		rawHTML = rawHTML.substring(temp);
+		find = "<td class=\"text-right\">";
+		temp = rawHTML.indexOf("<td class=\"text-right\">") + find.length();
+		rawHTML = rawHTML.substring(temp);
+		find = "</td>";
+		temp = rawHTML.indexOf(find) + find.length();
+		String amount = rawHTML.substring(0,temp);
+		amount = amount.replaceAll("\\s","");
+		amount = amount.substring(0, amount.length()-5);
+		Double etfFunds = Double.parseDouble(amount.substring(0,amount.length()-1));
+		amount = "" + amount.charAt(amount.length()-1);
+		if(amount.equals("M")){
+			etfFunds*=1000000;
+		}else{
+			etfFunds*=1000000000;
+		}
+		etfs.put(ETFName, etfFunds);
 		while (temp != -1) {
 			temp = rawHTML.indexOf("/stock/");
 			rawHTML = rawHTML.substring(temp);
@@ -53,7 +72,7 @@ public class CSV {
 		}
 	}
 
-	public static void buildETFData(HashMap<String, ArrayList<ETFPair>> map) {
+	public static void buildETFData(HashMap<String, ArrayList<ETFPair>> map, HashMap<String, Double> etfs) {
 		StringBuilder sb = new StringBuilder();
 		try {
 			PrintWriter pw;
@@ -61,11 +80,20 @@ public class CSV {
 
 			Set<String> keys = map.keySet();
 			for (String key : keys) {
+				double price = GetCurrentAsk(key);
+				if(price == 0)
+					continue;
+				double cap = GetCurrentMarketCap(key);
 				ArrayList<ETFPair> pairs = map.get(key);
 				sb.append(key + ",");
+				double totalShares = 0;
 				for (ETFPair p : pairs) {
-					sb.append(p.name + "," + p.percent + ",");
+					double funds = etfs.get(p.name);
+					double amount = (funds * p.percent/100)/price;
+					sb.append(p.name + "," + amount + ",");
+					totalShares+=amount;
 				}
+				sb.append("Total Shares," + totalShares + "," + "Market Cap," + cap/price + ",Percent," + totalShares/(cap/price)*100);
 				sb.append("\n");
 			}
 			pw.write(sb.toString());
@@ -167,7 +195,35 @@ public class CSV {
 		}
 		return prices;
 	}
-
+	public static double GetCurrentAsk(String SYM){
+		String data = FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + SYM + "&f=a");
+		double price = 0;
+		try { 
+			price = Double.parseDouble(data);
+		}catch(Exception e){
+			
+		}
+		return price;
+	}
+	public static double GetCurrentMarketCap(String SYM){
+		String data = FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + SYM + "&f=j1");
+		double price = 0;
+		try { 
+			String amnt = ""+ data.substring(data.length()-4);
+			amnt = amnt.replaceAll("\\s","");
+			amnt = amnt.replaceAll("\n","");
+			price = Double.parseDouble(data.substring(0, data.length()-2));
+			amnt = "" + amnt.charAt(amnt.length()-1);
+			if(amnt.equals("M")){
+				price*=1000000;
+			}else{
+				price*=1000000000;
+			}
+		}catch(Exception e){
+			
+		}
+		return price;
+	}
 	public static String FetchCSVData(String urlString) {
 		// urlString =
 		// "http://finance.yahoo.com/d/quotes.csv?s=GSPC+GOOG+MSFT&f=snbaopl1";

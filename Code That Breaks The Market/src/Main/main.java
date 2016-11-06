@@ -22,13 +22,15 @@ public class main {
 				"DGAZ","XLP","HYG","JNK","DUST","XLI","GLD","SLV","SDS","XLV","UCO","XLK","TVIX","IYR","TLT","RSX","TZA","AMLP","EWT","VEA","IEMG","UNG","SQQQ",
 				"XBI","IAU","SPXU","LQD","KRE","SVXY","XLY","OIH","JDST","DWTI","SPXS","XLB","VNQ","XME","DXJ","EZU","EWW","USMV","DBEF","BKLN","XRT","ERX","TNA","LABD","EWU","VGK",
 				"IVV","EPI","EWG","KBE","PFF","VIXY","DIA","LABU","OIL","UGAZ","FAS","SPLV","SSO","EWH","AGG","SMH","SH","IWD","UPRO","QID","EWY","ITB","INDA","XHB","ERY"};
+		//String[] ETFS = {"GDX"};
 		HashMap<String, ArrayList<ETFPair>> map = new HashMap<String, ArrayList<ETFPair>>();
+		HashMap<String, Double> etfs = new HashMap<String, Double>();
 		for(String etf : ETFS){
 			System.out.println(etf);
 			String test = CSV.FetchCSVData("http://etfdailynews.com/etf/" + etf + "/");
-			CSV.parseETF(etf, map, test);
+			CSV.parseETF(etf, map, etfs, test);
 		}
-		CSV.buildETFData(map);
+		CSV.buildETFData(map, etfs);
 		System.out.println(map);
 		//System.out.println(test);
 
