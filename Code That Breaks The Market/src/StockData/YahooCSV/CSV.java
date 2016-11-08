@@ -25,7 +25,8 @@ public class CSV {
 
 	}
 
-	public static void parseETF(String ETFName, HashMap<String, ArrayList<ETFPair>> map, HashMap<String, Double> etfs, String rawHTML) {
+	public static void parseETF(String ETFName, HashMap<String, ArrayList<ETFPair>> map, HashMap<String, Double> etfs,
+			String rawHTML) {
 		int temp = 0;
 		String SYM = "";
 		double percent = 0;
@@ -37,15 +38,15 @@ public class CSV {
 		rawHTML = rawHTML.substring(temp);
 		find = "</td>";
 		temp = rawHTML.indexOf(find) + find.length();
-		String amount = rawHTML.substring(0,temp);
-		amount = amount.replaceAll("\\s","");
-		amount = amount.substring(0, amount.length()-5);
-		Double etfFunds = Double.parseDouble(amount.substring(0,amount.length()-1));
-		amount = "" + amount.charAt(amount.length()-1);
-		if(amount.equals("M")){
-			etfFunds*=1000000;
-		}else{
-			etfFunds*=1000000000;
+		String amount = rawHTML.substring(0, temp);
+		amount = amount.replaceAll("\\s", "");
+		amount = amount.substring(0, amount.length() - 5);
+		Double etfFunds = Double.parseDouble(amount.substring(0, amount.length() - 1));
+		amount = "" + amount.charAt(amount.length() - 1);
+		if (amount.equals("M")) {
+			etfFunds *= 1000000;
+		} else {
+			etfFunds *= 1000000000;
 		}
 		etfs.put(ETFName, etfFunds);
 		while (temp != -1) {
@@ -79,25 +80,44 @@ public class CSV {
 			pw = new PrintWriter(new File("ETF.csv"));
 
 			Set<String> keys = map.keySet();
-			for (String key : keys) {
-				double price = GetCurrentAsk(key);
-				if(price == 0)
+			HashMap<String, Double> Asks = GetCurrentAsks(keys);
+			HashMap<String, Double> MarketCaps = GetCurrentMarketCaps(keys);
+			System.out.println("Lets save to a CSV");
+			Set<String> newKeys = Asks.keySet();
+			System.out.println(Asks.toString());
+			int counter = 0;
+			for (String key : newKeys) {
+				if (!Asks.containsKey(key))
 					continue;
-				double cap = GetCurrentMarketCap(key);
+				double cap;
+				if(!MarketCaps.containsKey(key)){
+					cap = 0;
+				}
+				else{
+					 cap = MarketCaps.get(key);
+				}
+				double price = Asks.get(key);
+				if(price == 0) continue;
+				System.out.println(key);
+			//	if (price == 0)
+		//			continue;
+				counter++;
 				ArrayList<ETFPair> pairs = map.get(key);
 				sb.append(key + ",");
 				double totalShares = 0;
 				for (ETFPair p : pairs) {
 					double funds = etfs.get(p.name);
-					double amount = (funds * p.percent/100)/price;
+					double amount = (funds * p.percent / 100) / price;
 					sb.append(p.name + "," + amount + ",");
-					totalShares+=amount;
+					totalShares += amount;
 				}
-				sb.append("Total Shares," + totalShares + "," + "Market Cap," + cap/price + ",Percent," + totalShares/(cap/price)*100);
+				sb.append("Total Shares," + totalShares + "," + "Market Cap," + cap / price + ",Percent,"
+						+ totalShares / (cap / price) * 100);
 				sb.append("\n");
 			}
 			pw.write(sb.toString());
 			pw.close();
+			System.out.println(counter);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -173,6 +193,27 @@ public class CSV {
 		return data;
 	}
 
+	public static HistoricalData ParseHistoricalCSVQuandl(String csvData) {
+		HistoricalData data = new HistoricalData();
+		String[] rows = csvData.split("\n");
+		rows[0] = "";
+		for (String row : rows) {
+			if (row == null || row.equals(""))
+				continue;
+			String[] cols = row.split(",");
+			HistoricalPoint p = new HistoricalPoint();
+			p.Date = cols[0];
+			p.Open = Float.parseFloat(cols[1]);
+			p.High = Float.parseFloat(cols[2]);
+			p.Low = Float.parseFloat(cols[3]);
+			p.Close = Float.parseFloat(cols[4]);
+			p.Volume = Float.parseFloat(cols[5]);
+			p.AdjClose = Float.parseFloat(cols[6]);
+			data.points.add(p);
+		}
+		return data;
+	}
+
 	public static ArrayList<Price> ParseCSV(String csvData) {
 		csvData = FetchCSVData("");
 		if (csvData.equals("ERROR"))
@@ -195,35 +236,149 @@ public class CSV {
 		}
 		return prices;
 	}
-	public static double GetCurrentAsk(String SYM){
+
+	public static double GetLastClose(String SYM) {
+		try {
+			String data = FetchCSVData("https://www.quandl.com/api/v3/datasets/WIKI/" + SYM + ".csv?rows=1");
+			HistoricalPoint p = ParseHistoricalCSVQuandl(data).points.get(0);
+			return p.Close;
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	public static HashMap<String, Double> GetCurrentAsks(Set<String> SYMSet) {
+		String[] SYMS = SYMSet.toArray(new String[SYMSet.size()]);
+		HashMap<String, Double> Asks = new HashMap<String, Double>();
+		try {
+			ArrayList<String> AskLists = new ArrayList<String>();
+			String AskList = "";
+			int counter = 0;
+			for (int i = 0; i < SYMS.length; i++) {
+				String SYM = SYMS[i];
+				if (SYM.matches(".*\\d.*")) {
+					AskList += ("LOLSLOLS+");
+				} else if (SYM.length() <= 1) {
+					AskList += ("LOLSLOLS+");
+				} else {
+					AskList += (SYM.replaceAll("\\s", "") + "+");
+				}
+				if (counter % 250 == 0 && counter != 0) {
+					counter = 0;
+					AskLists.add(AskList);
+					AskList = "";
+				} else {
+					counter++;
+				}
+			}
+			AskLists.add(AskList);
+			String data = "";
+			for (int i = 0; i < AskLists.size()-1; i++){
+				String list = AskLists.get(i);
+				data += FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + list + "&f=a");
+			}
+			String[] numbers = data.split("\n");
+			counter = 0;
+			for (int i = 0; i < numbers.length; i++) {
+				String num = numbers[i];
+				double d = 0;
+				try {
+					d = Double.parseDouble(num);
+				} catch (Exception e) {
+				}
+				Asks.put(SYMS[counter], d);
+				counter++;
+			}
+		} catch (Exception e) {
+		}
+		return Asks;
+	}
+
+	public static HashMap<String, Double> GetCurrentMarketCaps(Set<String> SYMSet) {
+		String[] SYMS = SYMSet.toArray(new String[SYMSet.size()]);
+		HashMap<String, Double> Caps = new HashMap<String, Double>();
+		try {
+			ArrayList<String> AskLists = new ArrayList<String>();
+			String AskList = "";
+			int counter = 0;
+			for (int i = 0; i < SYMS.length; i++) {
+				String SYM = SYMS[i];
+				if (SYM.matches(".*\\d.*")) {
+					AskList += ("LOLSLOLS+");
+				} else if (SYM.length() <= 1) {
+					AskList += ("LOLSLOLS+");
+				} else {
+					AskList += (SYM.replaceAll("\\s", "") + "+");
+				}
+				if (counter % 250 == 0 && counter != 0) {
+					counter = 0;
+					AskLists.add(AskList);
+					AskList = "";
+				} else {
+					counter++;
+				}
+			}
+			AskLists.add(AskList);
+			String data = "";
+			for (int i = 0; i < AskLists.size()-1; i++){
+				String list = AskLists.get(i);
+				data += FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + list + "&f=a");
+			}
+			String[] numbers = data.split("\n");
+			counter = 0;
+			for (int i = 0; i < numbers.length; i++) {
+				String num = numbers[i];
+				double d = 0;
+				try {
+					d = Double.parseDouble(num.substring(0, num.length() - 1));
+					String amnt = "" + num.charAt(num.length() - 1);
+					if (amnt.equals("M")) {
+						d *= 1000000;
+					} else {
+						d *= 1000000000;
+					}
+				} catch (Exception e) {
+				}
+				Caps.put(SYMS[counter], d);
+				counter++;
+			}
+		} catch (Exception e) {
+			System.out.println("blurp");
+		}
+		return Caps;
+	}
+
+	public static double GetCurrentAsk(String SYM) {
 		String data = FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + SYM + "&f=a");
 		double price = 0;
-		try { 
+		try {
 			price = Double.parseDouble(data);
-		}catch(Exception e){
-			
+		} catch (Exception e) {
+
 		}
 		return price;
 	}
-	public static double GetCurrentMarketCap(String SYM){
+
+	public static double GetCurrentMarketCap(String SYM) {
 		String data = FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + SYM + "&f=j1");
 		double price = 0;
-		try { 
-			String amnt = ""+ data.substring(data.length()-4);
-			amnt = amnt.replaceAll("\\s","");
-			amnt = amnt.replaceAll("\n","");
-			price = Double.parseDouble(data.substring(0, data.length()-2));
-			amnt = "" + amnt.charAt(amnt.length()-1);
-			if(amnt.equals("M")){
-				price*=1000000;
-			}else{
-				price*=1000000000;
+		try {
+			String amnt = "" + data.substring(data.length() - 4);
+			amnt = amnt.replaceAll("\\s", "");
+			amnt = amnt.replaceAll("\n", "");
+			price = Double.parseDouble(data.substring(0, data.length() - 2));
+			amnt = "" + amnt.charAt(amnt.length() - 1);
+			if (amnt.equals("M")) {
+				price *= 1000000;
+			} else {
+				price *= 1000000000;
 			}
-		}catch(Exception e){
-			
+		} catch (Exception e) {
+
 		}
 		return price;
 	}
+
 	public static String FetchCSVData(String urlString) {
 		// urlString =
 		// "http://finance.yahoo.com/d/quotes.csv?s=GSPC+GOOG+MSFT&f=snbaopl1";
