@@ -108,11 +108,16 @@ public class CSV {
 				for (ETFPair p : pairs) {
 					double funds = etfs.get(p.name);
 					double amount = (funds * p.percent / 100) / price;
-					sb.append(p.name + "," + amount + ",");
+				//	sb.append(p.name + "," + amount + ",");-
 					totalShares += amount;
 				}
 				sb.append("Total Shares," + totalShares + "," + "Market Cap," + cap / price + ",Percent,"
-						+ totalShares / (cap / price) * 100);
+						+ totalShares / (cap / price) * 100 + ",Ask," + price + ",Cap," + cap + ",SYM," + key +",");
+				for (ETFPair p : pairs) {
+					double funds = etfs.get(p.name);
+					double amount = (funds * p.percent / 100) / price;
+					sb.append(p.name + "," + amount + ",");
+				}
 				sb.append("\n");
 			}
 			pw.write(sb.toString());
@@ -258,12 +263,12 @@ public class CSV {
 				String SYM = SYMS[i];
 				if (SYM.matches(".*\\d.*")) {
 					AskList += ("LOLSLOLS+");
-				} else if (SYM.length() <= 1) {
+				} else if (SYM.length() <= 1 || SYM.contains(":")) {
 					AskList += ("LOLSLOLS+");
 				} else {
 					AskList += (SYM.replaceAll("\\s", "") + "+");
 				}
-				if (counter % 250 == 0 && counter != 0) {
+				if (counter % 997 == 0 && counter != 0) {
 					counter = 0;
 					AskLists.add(AskList);
 					AskList = "";
@@ -273,7 +278,7 @@ public class CSV {
 			}
 			AskLists.add(AskList);
 			String data = "";
-			for (int i = 0; i < AskLists.size()-1; i++){
+			for (int i = 0; i < AskLists.size(); i++){
 				String list = AskLists.get(i);
 				data += FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + list + "&f=a");
 			}
@@ -305,7 +310,7 @@ public class CSV {
 				String SYM = SYMS[i];
 				if (SYM.matches(".*\\d.*")) {
 					AskList += ("LOLSLOLS+");
-				} else if (SYM.length() <= 1) {
+				} else if (SYM.length() <= 1 || SYM.contains(":")) {
 					AskList += ("LOLSLOLS+");
 				} else {
 					AskList += (SYM.replaceAll("\\s", "") + "+");
@@ -320,9 +325,9 @@ public class CSV {
 			}
 			AskLists.add(AskList);
 			String data = "";
-			for (int i = 0; i < AskLists.size()-1; i++){
+			for (int i = 0; i < AskLists.size(); i++){
 				String list = AskLists.get(i);
-				data += FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + list + "&f=a");
+				data += FetchCSVData("http://finance.yahoo.com/d/quotes.csv?s=" + list + "&f=j1");
 			}
 			String[] numbers = data.split("\n");
 			counter = 0;
